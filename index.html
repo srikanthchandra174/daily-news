@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Briefing</title>
+<style>
+  :root{
+    --bg:#0d1117; --surface:#151b23; --surface2:#1b2430; --border:#243140;
+    --text:#e6edf3; --muted:#8d9bab; --accent:#3dd7c0; --amber:#e8b339;
+    --danger:#f0795f; --new:#3dd7c0;
+    --tech:#58a6ff; --jobs:#e8b339; --india:#ff7a59; --world:#3dd7c0;
+    --business:#a78bfa; --entertainment:#f472b6;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  [data-theme="light"]{
+    --bg:#f4f6f8; --surface:#ffffff; --surface2:#eef1f4; --border:#d8dee6;
+    --text:#16202b; --muted:#5d6b7a; --accent:#0f9c8a; --amber:#b9760a;
+    --danger:#cc4b34; --new:#0f9c8a;
+    --tech:#1f6feb; --jobs:#b9760a; --india:#d65a3a; --world:#0f9c8a;
+    --business:#7c5cf0; --entertainment:#d6488f;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.45;
+    min-height:100vh;-webkit-font-smoothing:antialiased}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:880px;margin:0 auto;padding:0 16px 90px}
+
+  header{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--border)}
+  .bar{max-width:880px;margin:0 auto;padding:13px 16px 9px;display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+  .brand{font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .brand .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:middle}
+  .clock{font-family:var(--mono);font-size:13px;color:var(--muted)}
+  .clock b{color:var(--text);font-weight:600}
+  .spacer{flex:1}
+  .iconbtn{background:var(--surface);border:1px solid var(--border);color:var(--text);width:34px;height:34px;
+    border-radius:8px;cursor:pointer;font-size:15px;display:inline-flex;align-items:center;justify-content:center;transition:.15s}
+  .iconbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .iconbtn.on{color:var(--accent);border-color:var(--accent)}
+  .iconbtn.spin{animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .chips{max-width:880px;margin:0 auto;padding:0 16px 11px;display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .chip{font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid var(--border);
+    background:var(--surface);color:var(--muted);cursor:pointer;transition:.15s;white-space:nowrap}
+  .chip:hover{color:var(--text)}
+  .chip.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .chip .dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .chip .ct{opacity:.6;font-family:var(--mono);font-size:11px;margin-left:5px}
+  .search{margin-left:auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;
+    padding:6px 10px;color:var(--text);font-size:13px;font-family:var(--sans);width:130px;transition:.15s}
+  .search:focus{outline:none;border-color:var(--accent);width:175px}
+
+  .meta-line{padding:10px 0 2px;font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+  .meta-line b{color:var(--text)}
+
+  .feed{margin-top:6px}
+  .row{display:grid;grid-template-columns:54px 1fr 26px;gap:12px;padding:13px 8px;border-bottom:1px solid var(--border);
+    align-items:start;border-radius:8px;transition:background .1s}
+  .row:hover{background:var(--surface)}
+  .row.sel{background:var(--surface);box-shadow:inset 3px 0 0 var(--accent)}
+  .row.read .main h2{color:var(--muted);font-weight:500}
+  .row.read .time{opacity:.5}
+  .time{font-family:var(--mono);font-size:12px;color:var(--muted);padding-top:1px;text-align:right;white-space:nowrap}
+  .time.fresh{color:var(--accent)}
+  .main h2{font-size:15.5px;font-weight:600;line-height:1.35;margin-bottom:5px}
+  .row:hover .main h2,.row.sel .main h2{color:var(--accent)}
+  .row.read:hover .main h2{color:var(--text)}
+  .newtag{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;
+    color:var(--bg);background:var(--new);padding:1px 5px;border-radius:4px;margin-right:7px;vertical-align:middle}
+  .meta{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .meta .badge{display:inline-flex;align-items:center;gap:5px}
+  .meta .topicdot{width:7px;height:7px;border-radius:50%}
+  .desc{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.4}
+  .star{cursor:pointer;font-size:16px;color:var(--border);text-align:center;padding-top:1px;user-select:none;line-height:1}
+  .star:hover{color:var(--amber)} .star.on{color:var(--amber)}
+
+  .empty,.loading-note{text-align:center;color:var(--muted);padding:48px 20px;font-family:var(--mono);font-size:13px;line-height:1.7}
+  .footnote{margin-top:28px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);line-height:1.7}
+  .footnote code{font-family:var(--mono);background:var(--surface);padding:1px 5px;border-radius:4px;color:var(--text)}
+  .footnote kbd{font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);border-bottom-width:2px;
+    border-radius:5px;padding:1px 6px;font-size:11px;color:var(--text)}
+  @media (max-width:560px){
+    .row{grid-template-columns:44px 1fr 24px;gap:9px}
+    .search{width:104px}.search:focus{width:124px}.brand{font-size:13px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <span class="brand"><span class="live"></span>Daily Briefing</span>
+    <span class="clock"><b id="clock">--:--</b> · <span id="newcount">0</span> new</span>
+    <span class="spacer"></span>
+    <button class="iconbtn" id="hideread" title="Hide read items (h)">◑</button>
+    <button class="iconbtn" id="theme" title="Light / dark">☾</button>
+    <button class="iconbtn" id="refresh" title="Reload news.json (r)">⟳</button>
+  </div>
+  <div class="chips" id="chips"></div>
+</header>
+
+<div class="wrap">
+  <div class="meta-line" id="metaLine"></div>
+  <div class="feed" id="feed"><div class="loading-note">Loading news.json…</div></div>
+
+  <div class="footnote">
+    <b>Keyboard:</b>
+    <kbd>j</kbd>/<kbd>k</kbd> move · <kbd>o</kbd> open · <kbd>s</kbd> save · <kbd>h</kbd> hide read · <kbd>r</kbd> refresh · <kbd>/</kbd> search<br>
+    News is fetched on GitHub's servers once an hour by a GitHub Action and committed to <code>news.json</code>.
+    Your browser only ever reads a static file from your own Pages site — no CORS, no proxies, no keys.
+    Saves &amp; read-state persist on this device. To change sources, edit <code>scripts/fetch-news.mjs</code> in the repo.
+  </div>
+</div>
+
+<script>
+const TOPICS = [
+  { id:'all',           label:'All' },
+  { id:'tech',          label:'AI / Tech',  color:'var(--tech)' },
+  { id:'jobs',          label:'Jobs',       color:'var(--jobs)' },
+  { id:'india',         label:'India',      color:'var(--india)' },
+  { id:'world',         label:'World',      color:'var(--world)' },
+  { id:'business',      label:'Business',   color:'var(--business)' },
+  { id:'entertainment', label:'Movies',     color:'var(--entertainment)' },
+  { id:'saved',         label:'★ Saved' },
+];
+
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} },
+};
+let saved=new Set(LS.get('briefing.saved',[]));
+let read=new Set(LS.get('briefing.read',[]));
+let hideRead=LS.get('briefing.hideRead',false);
+const lastVisit = LS.get('briefing.lastVisit', Date.now());
+LS.set('briefing.lastVisit', Date.now());
+
+const $ = s => document.querySelector(s);
+let ITEMS=[], UPDATED=null, active='all', query='', sel=-1, visible=[];
+
+const topicColor = id => (TOPICS.find(t=>t.id===id)||{}).color || 'var(--muted)';
+const esc = s => (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function timeAgo(d){ if(!d||isNaN(d))return'—'; const s=(Date.now()-d.getTime())/1000;
+  if(s<60)return'now'; if(s<3600)return Math.floor(s/60)+'m'; if(s<86400)return Math.floor(s/3600)+'h'; return Math.floor(s/86400)+'d'; }
+const isFresh = d => d&&!isNaN(d)&&(Date.now()-d.getTime())<3*3600*1000;
+const isNew   = d => d&&!isNaN(d)&&d.getTime()>lastVisit;
+
+async function load(){
+  $('#refresh').classList.add('spin');
+  try{
+    const r = await fetch('news.json?'+Date.now(),{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const d = await r.json();
+    UPDATED = d.updated ? new Date(d.updated) : null;
+    ITEMS = (d.items||[]).map(x=>({ ...x, time: x.time ? new Date(x.time) : null }));
+  }catch(e){
+    $('#feed').innerHTML=`<div class="empty">Could not load news.json — ${esc(e.message)}.<br>
+      If you've just deployed, the first GitHub Action may still be running. Check the <b>Actions</b> tab.</div>`;
+    ITEMS=[];
+  }
+  $('#refresh').classList.remove('spin'); render();
+}
+
+function chipCount(id){
+  if(id==='all') return ITEMS.length;
+  if(id==='saved') return ITEMS.filter(x=>saved.has(x.url)).length;
+  return ITEMS.filter(x=>x.topic===id).length;
+}
+function renderChips(){
+  $('#chips').innerHTML=TOPICS.map(t=>{
+    const c=chipCount(t.id);
+    return `<button class="chip ${t.id===active?'on':''}" data-id="${t.id}">
+      ${t.color?`<span class="dot" style="background:${t.color}"></span>`:''}${t.label}${c?`<span class="ct">${c}</span>`:''}</button>`;
+  }).join('')+`<input class="search" id="search" placeholder="filter…" value="${esc(query)}">`;
+  $('#chips').querySelectorAll('.chip').forEach(c=>c.onclick=()=>{active=c.dataset.id;sel=-1;render();});
+  const s=$('#search'); s.oninput=()=>{query=s.value.toLowerCase().trim();sel=-1;render();};
+  s.onkeydown=e=>{ if(e.key==='Escape')s.blur(); };
+}
+function currentList(){
+  let list=ITEMS;
+  if(active==='saved') list=list.filter(x=>saved.has(x.url));
+  else if(active!=='all') list=list.filter(x=>x.topic===active);
+  if(query) list=list.filter(x=>(x.title+' '+(x.source||'')).toLowerCase().includes(query));
+  if(hideRead && active!=='saved') list=list.filter(x=>!read.has(x.url));
+  return list;
+}
+function render(){
+  $('#newcount').textContent=ITEMS.filter(x=>isNew(x.time)).length;
+  const ml=$('#metaLine');
+  const counts = TOPICS.filter(t=>t.id!=='all'&&t.id!=='saved').map(t=>`${t.label.split(' / ')[0]}: <b>${chipCount(t.id)}</b>`).join(' · ');
+  ml.innerHTML = UPDATED
+    ? `<span>news.json updated <b>${timeAgo(UPDATED)}</b> ago · <b>${ITEMS.length}</b> items</span><span>${counts}</span>`
+    : '<span>—</span>';
+  visible=currentList();
+  if(sel>=visible.length) sel=visible.length-1;
+  renderChips();
+  if(!visible.length){
+    const msg = active==='saved' ? 'No saved articles yet. Press <kbd>s</kbd> on any story to save it.'
+      : 'No items match this view.';
+    $('#feed').innerHTML=`<div class="empty">${msg}</div>`; return;
+  }
+  $('#feed').innerHTML=visible.map((x,i)=>`
+    <div class="row ${read.has(x.url)?'read':''} ${i===sel?'sel':''}" data-i="${i}">
+      <div class="time ${isFresh(x.time)?'fresh':''}">${timeAgo(x.time)}</div>
+      <a class="main" href="${x.url}" target="_blank" rel="noopener noreferrer" data-open="${i}">
+        <h2>${isNew(x.time)&&!read.has(x.url)?'<span class="newtag">NEW</span>':''}${esc(x.title)}</h2>
+        <div class="meta">
+          <span class="badge"><span class="topicdot" style="background:${topicColor(x.topic)}"></span>${esc(x.source||'')}</span>
+          ${x.metric?`<span>${esc(x.metric)}</span>`:''}
+        </div>
+        ${x.desc?`<div class="desc">${esc(x.desc)}</div>`:''}
+      </a>
+      <div class="star ${saved.has(x.url)?'on':''}" data-star="${i}" title="Save (s)">${saved.has(x.url)?'★':'☆'}</div>
+    </div>`).join('');
+  $('#feed').querySelectorAll('[data-open]').forEach(a=>a.addEventListener('click',()=>markRead(visible[+a.dataset.open].url)));
+  $('#feed').querySelectorAll('[data-star]').forEach(s=>s.addEventListener('click',e=>{e.preventDefault();toggleSave(visible[+s.dataset.star].url);}));
+}
+function markRead(url){ if(!read.has(url)){read.add(url);LS.set('briefing.read',[...read].slice(-2000));} }
+function toggleSave(url){ saved.has(url)?saved.delete(url):saved.add(url); LS.set('briefing.saved',[...saved]); render(); }
+
+document.addEventListener('keydown',e=>{
+  const tag=document.activeElement?.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA') return;
+  if(e.key==='/'){e.preventDefault();$('#search')?.focus();return;}
+  if(e.key==='r'){load();return;}
+  if(e.key==='h'){toggleHideRead();return;}
+  if(!visible.length) return;
+  if(e.key==='j'){ sel=Math.min(visible.length-1,sel+1); render(); scrollSel(); }
+  else if(e.key==='k'){ sel=Math.max(0,sel-1); render(); scrollSel(); }
+  else if(e.key==='o'||e.key==='Enter'){ if(sel>=0){const x=visible[sel];markRead(x.url);window.open(x.url,'_blank','noopener');render();} }
+  else if(e.key==='s'){ if(sel>=0)toggleSave(visible[sel].url); }
+});
+function scrollSel(){ $(`.row[data-i="${sel}"]`)?.scrollIntoView({block:'nearest'}); }
+function toggleHideRead(){ hideRead=!hideRead; LS.set('briefing.hideRead',hideRead);
+  $('#hideread').classList.toggle('on',hideRead); sel=-1; render(); }
+
+$('#refresh').onclick=load;
+$('#hideread').onclick=toggleHideRead;
+$('#theme').onclick=()=>{ const l=document.documentElement.getAttribute('data-theme')==='light';
+  document.documentElement.setAttribute('data-theme',l?'dark':'light'); $('#theme').textContent=l?'☾':'☀'; };
+
+if(hideRead) $('#hideread').classList.add('on');
+function tick(){ $('#clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
+renderChips(); tick(); setInterval(tick,1000); load();
+</script>
+</body>
+</html>
