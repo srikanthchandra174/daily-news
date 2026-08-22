@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Daily Briefing</title>
+<meta name="description" content="A fast, India-first news briefing. Sources fetched server-side every 6 hours.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0d1117" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
   :root{
     --bg:#0d1117; --surface:#151b23; --surface2:#1b2430; --border:#243140;
@@ -62,6 +70,7 @@
 
   .feed{margin-top:6px}
   .row{display:grid;grid-template-columns:54px 1fr 26px;gap:12px;padding:13px 8px;border-bottom:1px solid var(--border);
+    scroll-margin-top:104px;
     align-items:start;border-radius:8px;transition:background .1s}
   .row:hover{background:var(--surface)}
   .row.sel{background:var(--surface);box-shadow:inset 3px 0 0 var(--accent)}
@@ -157,8 +166,15 @@ let savedItems = (() => {
 const persistSaved = () => LS.set('briefing.savedItems',[...savedItems.values()]);
 let read=new Set(LS.get('briefing.read',[]));
 let hideRead=LS.get('briefing.hideRead',false);
+// lastVisit marks the boundary for NEW badges. It used to be overwritten on
+// every page load, so a single refresh wiped every badge. It's now written
+// when the session ends, and guarded so rapid reloads can't clobber it.
 const lastVisit = LS.get('briefing.lastVisit', Date.now());
-LS.set('briefing.lastVisit', Date.now());
+const stampVisit = () => {
+  if(Date.now() - lastVisit > 30*60*1000) LS.set('briefing.lastVisit', Date.now());
+};
+addEventListener('pagehide', stampVisit);
+addEventListener('visibilitychange', () => { if(document.hidden) stampVisit(); });
 
 const $ = s => document.querySelector(s);
 let ITEMS=[], UPDATED=null, active='all', query='', sel=-1, visible=[], HEALTH=null;
@@ -318,6 +334,14 @@ $('#theme').onclick=()=>applyTheme(
 if(hideRead) $('#hideread').classList.add('on');
 function tick(){ $('#clock').textContent=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}); }
 renderChips(); tick(); setInterval(tick,1000); load();
+
+// Service worker: offline reading and instant loads. Registered after the
+// page is up so it never delays first paint. Relative path matters — the app
+// is served from /daily-news/, not the domain root, so an absolute '/sw.js'
+// would 404 and the scope would be wrong.
+if('serviceWorker' in navigator){
+  addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
 </script>
 </body>
 </html>

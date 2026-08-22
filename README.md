@@ -57,6 +57,7 @@ It also exists as a small engineering exercise in solving a real problem the bor
 - **18 sources across 7 topics** — India, Hyderabad, Markets, AI/Tech, Jobs, World, Movies — roughly 65% India-origin by design
 - **Two filter axes** — `topic` (what it's about) and `region` (where it's from), so one chip gives you Indian tech, Indian markets and Indian movies at once
 - **Auto-refresh every 6 hours** via GitHub Actions cron (07:00 / 13:00 / 19:00 / 01:00 IST)
+- **Installable PWA** — add to home screen for a standalone app window, and the last fetched briefing stays readable with no connection
 - **Keyboard navigation** — `j`/`k` to move, `o` to open, `s` to save, `h` to hide read, `r` to refresh, `/` to filter
 - **Read-state tracking** — opened items dim automatically; toggle to hide them entirely
 - **Saved articles** — star anything; the full article is stored locally, so saves survive the feed turnover
@@ -81,6 +82,10 @@ It also exists as a small engineering exercise in solving a real problem the bor
 ```
 .
 ├── index.html                  # The reader (single-file SPA, ~14 KB)
+├── manifest.json               # PWA metadata: name, icons, standalone display
+├── sw.js                       # Service worker: offline shell + cached news.json
+├── favicon.ico
+├── icons/                      # 192 / 512 app icons + apple-touch-icon
 ├── news.json                   # Latest aggregated feed; rewritten every 6 hours by the Action
 ├── scripts/
 │   ├── fetch-news.mjs          # Node script: fetches sources, parses, dedupes, sorts
